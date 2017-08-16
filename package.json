@@ -1,0 +1,34 @@
+{
+  "name": "webpack-lib",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "lint": "eslint ./src/index.js",
+    "babel": "babel src -d lib",
+    "dev": "...",
+    "test": "mocha --ui qunit --compilers js:babel-core/register"
+  },
+  "author": "'Eugene' ",
+  "email": "<'18818272740@163.com'>",
+  "license": "MIT",
+  "devDependencies": {
+    "babel-cli": "^6.24.1",
+    "babel-core": "^6.25.0",
+    "babel-eslint": "^7.2.3",
+    "babel-plugin-transform-runtime": "^6.23.0",
+    "babel-preset-es2015": "^6.24.1",
+    "chai": "^4.1.1",
+    "eslint": "^3.19.0",
+    "eslint-config-standard": "^10.2.1",
+    "eslint-plugin-import": "^2.7.0",
+    "eslint-plugin-node": "^5.1.1",
+    "eslint-plugin-promise": "^3.5.0",
+    "eslint-plugin-standard": "^3.0.1",
+    "mocha": "^3.5.0",
+    "webpack": "^3.5.4"
+  },
+  "dependencies": {
+    "babel-runtime": "^6.25.0"
+  }
+}

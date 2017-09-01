@@ -1,3 +1,6 @@
+import rules from './rules'
+import {Chess} from './Chess'
+import ChessBoard from './ChessBoard'
 export class Game {
   constructor (id = 'chess', {width = 500, height = 500} = {}) {
     this.id = id
@@ -13,5 +16,12 @@ export class Game {
     canvasEle.width = this.width
     canvasEle.height = this.height
     document.body.appendChild(canvasEle)
+  }
+  addBoard () {
+    let board = new ChessBoard(this.id)
+    board.render()
+  }
+  addChesses () {
+
   }
 }

@@ -1,4 +1,4 @@
-export class ChessBoard {
+export default class ChessBoard {
   constructor (id, {interval = 40} = {}) {
     this.id = id
     this.interval = interval

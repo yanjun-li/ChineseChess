@@ -1,8 +1,9 @@
 export class Chess {
-  constructor (name, color, pos) {
-    this.name = name
+  constructor (role, color, name, {x = 0, y = 0} = {}) {
+    this.role = role
     this.color = color
-    this.pos = pos
+    this.name = name
+    this.pos = {x, y}
   }
 
   render (board) {
@@ -32,3 +33,42 @@ export class Chess {
     ctx.fillText(this.name, 0, 0)
   }
 }
+
+class General extends Chess {
+  moveTo (pos) {
+    this.pos = pos
+  }
+}
+
+class Guard extends Chess {
+  moveTo (pos) {
+    this.pos = pos
+  }
+}
+class Bishop extends Chess {
+  moveTo (pos) {
+    this.pos = pos
+  }
+}
+class Knight extends Chess {
+  moveTo (pos) {
+    this.pos = pos
+  }
+}
+class Rook extends Chess {
+  moveTo (pos) {
+    this.pos = pos
+  }
+}
+class Cannon extends Chess {
+  moveTo (pos) {
+    this.pos = pos
+  }
+}
+class Pawn extends Chess {
+  moveTo (pos) {
+    this.pos = pos
+  }
+}
+
+export {General, Guard, Bishop, Knight, Rook, Cannon, Pawn}

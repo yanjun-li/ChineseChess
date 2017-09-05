@@ -1,26 +1,25 @@
-import utils from './utils'
-export default const rules = utils.deepFreeze({
-  red: {
-    general,
-    guard,
-    bishop,
-    knight,
-    rook,
-    cannon,
-    pawn
+import * as utils from './utils'
+
+const RULES = {
+  camps: {
+    '1': 'red',
+    '-1': 'black'
   },
-  camps: ['red', 'black'],
+  ChessName: {
+    red: ['帅', '仕', '相', '车', '马', '炮', '兵'],
+    black: ['将', '士', '象', '车', '马', '炮', '卒']
+  },
   roles: ['General', 'Guard', 'Bishop', 'Knight', 'Rook', 'Cannon', 'Pawn'],
   initChesses: [
-    [-1, 3, {x: 0, y: 0}],
-    [-1, 4, {x: 1, y: 0}],
+    [-1, 4, {x: 0, y: 0}],
+    [-1, 3, {x: 1, y: 0}],
     [-1, 5, {x: 2, y: 0}],
     [-1, 6, {x: 3, y: 0}],
     [-1, 7, {x: 4, y: 0}],
     [-1, 6, {x: 5, y: 0}],
     [-1, 5, {x: 6, y: 0}],
-    [-1, 4, {x: 7, y: 0}],
-    [-1, 3, {x: 8, y: 0}],
+    [-1, 3, {x: 7, y: 0}],
+    [-1, 4, {x: 8, y: 0}],
     [-1, 2, {x: 1, y: 2}],
     [-1, 2, {x: 7, y: 2}],
     [-1, 1, {x: 0, y: 3}],
@@ -29,15 +28,15 @@ export default const rules = utils.deepFreeze({
     [-1, 1, {x: 6, y: 3}],
     [-1, 1, {x: 8, y: 3}],
 
-    [1, 3, {x: 0, y: 9}],
-    [1, 4, {x: 1, y: 9}],
+    [1, 4, {x: 0, y: 9}],
+    [1, 3, {x: 1, y: 9}],
     [1, 5, {x: 2, y: 9}],
     [1, 6, {x: 3, y: 9}],
     [1, 7, {x: 4, y: 9}],
     [1, 6, {x: 5, y: 9}],
     [1, 5, {x: 6, y: 9}],
-    [1, 4, {x: 7, y: 9}],
-    [1, 3, {x: 8, y: 9}],
+    [1, 3, {x: 7, y: 9}],
+    [1, 4, {x: 8, y: 9}],
     [1, 2, {x: 1, y: 7}],
     [1, 2, {x: 7, y: 7}],
     [1, 1, {x: 0, y: 6}],
@@ -46,7 +45,6 @@ export default const rules = utils.deepFreeze({
     [1, 1, {x: 6, y: 6}],
     [1, 1, {x: 8, y: 6}]
   ]
-})
-
-// '帅','车','马','炮','相','仕','兵'
-// '将','车','马','炮','象','士','卒'
+}
+utils.deepFreeze(RULES)
+export {RULES}

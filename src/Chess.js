@@ -3,11 +3,11 @@ import {RULES} from './rules'
 // import {posToPixel} from './utils'
 
 export class Chess {
-  constructor (color, role, {x = 0, y = 0} = {}) {
+  constructor (color, role, point) {
     this.role = role
     this.color = RULES.camps[color]
     this.name = RULES.ChessName[RULES.camps[color]][7 - role]
-    this.pos = {x, y}
+    this.pos = point
     this.board = null
   }
 
@@ -51,6 +51,18 @@ export class Chess {
 class General extends Chess {
   moveTo (pos) {
     this.pos = pos
+  }
+  isValidPos (pos) {
+    if (this.color === -1) {
+      if (pos.x >= 3 && pos.x <= 5 && pos.y >= 0 && pos.y <= 2) {
+        return true
+      }
+    } else {
+      if (pos.x >= 3 && pos.x <= 5 && pos.y >= 7 && pos.y <= 9) {
+        return true
+      }
+    }
+    return false
   }
 }
 

@@ -1,6 +1,6 @@
 import * as Chesses from './Chess'
 import * as utils from './utils'
-
+import Point from './Point'
 import ChessBoard from './ChessBoard'
 import {RULES} from './rules'
 
@@ -21,14 +21,14 @@ export class Game {
       chess.render(board)
     })
 
-    let clickHandler = function (e) {
-      let pixelPos = utils.getCanvasPos(e, this.id)
+    let clickHandler = function (event) {
+      let pixelPos = utils.getCanvasPos(event, this.id)
       let clickChess = chessList.find(chess => {
         let distance = chess.distanceTo(pixelPos)
         return distance <= board.interval
       })
       console.log(clickChess.name)
-    }
+    }.bind(null)
     canvas.addEventListener('click', clickHandler)
   }
   createCanvasEle () {
@@ -43,9 +43,12 @@ export class Game {
     let board = new ChessBoard(id)
     return board
   }
-  createChesses (data) {
-    let role = RULES.roles[7 - data[1]]
-    let chess = new Chesses[role](...data)
+  createChesses (...data) {
+    let chessType = RULES.roles[7 - data[1]]
+    let point = new Point(data[2], data[3])
+    let [color, role] = [data[0], data[1]]
+
+    let chess = new Chesses[chessType](color, role, point)
     return chess
   }
 }

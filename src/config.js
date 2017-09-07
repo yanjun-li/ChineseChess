@@ -1,13 +1,20 @@
 import * as utils from './utils'
 
-const RULES = {
-  camps: {
-    '1': 'red',
-    '-1': 'black'
+const Config = {
+  BoardConfig: {
+    interval: 40,
+    offset: {
+      x: 40,
+      y: 40
+    }
+  },
+  Color: {
+    RED: 1,
+    BLACK: -1
   },
   ChessName: {
-    red: ['帅', '仕', '相', '车', '马', '炮', '兵'],
-    black: ['将', '士', '象', '车', '马', '炮', '卒']
+    '1': ['帅', '仕', '相', '车', '马', '炮', '兵'],
+    '-1': ['将', '士', '象', '车', '马', '炮', '卒']
   },
   roles: ['General', 'Guard', 'Bishop', 'Knight', 'Rook', 'Cannon', 'Pawn'],
   initChesses: [
@@ -46,5 +53,6 @@ const RULES = {
     [1, 1, 8, 6]
   ]
 }
-utils.deepFreeze(RULES)
-export {RULES}
+utils.deepFreeze(Config)
+
+export {Config}

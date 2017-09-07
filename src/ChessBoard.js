@@ -1,12 +1,14 @@
+import {Config} from './config'
 export default class ChessBoard {
-  constructor (id, {interval = 40} = {}) {
+  constructor (id, {interval = Config.BoardConfig.interval, offset = Config.BoardConfig.offset} = {}) {
     this.id = id
     this.interval = interval
+    this.offset = offset
     this.canvas = document.getElementById(this.id)
   }
   render () {
     let ctx = this.canvas.getContext('2d')
-    ctx.translate(this.interval, this.interval)
+    ctx.translate(this.offset.x, this.offset.y)
 
     // 内部网格
     for (let j = 0; j < 9; j++) {

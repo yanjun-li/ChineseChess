@@ -1,13 +1,15 @@
 import {Config} from './config'
+import Point from './Point'
+let Color = ['black', 'red']
 class Chess {
   constructor (color, role, point) {
     this.role = role
     this.color = color
-    this.name = Config.ChessName[color.toString()][7 - role]
+    this.name = Config.ChessName[(7 - role) + color * 7]
     this.radius = Config.BoardConfig.interval / 2 * 0.9
     this.point = point
     this.board = null
-
+    this.game = null
     // 状态
     this.isActive = false
     this.isDefeated = false
@@ -20,6 +22,10 @@ class Chess {
  * @memberof Chess
  */
   render (board) {
+    if (this.isDefeated) {
+      return 0
+    }
+    let gray = 'rgb(238, 238, 238)'
     this.board = board
     const interval = board.interval
     const canvas = board.canvas
@@ -31,7 +37,7 @@ class Chess {
     ctx.save()
     ctx.lineWidth = 2
     ctx.strokeStyle = '#000'
-    ctx.fillStyle = 'rgb(238, 238, 238)'
+    ctx.fillStyle = gray
     ctx.beginPath()
     ctx.arc(x, y, this.radius, 0, Math.PI * 2)
     ctx.fill()
@@ -48,7 +54,7 @@ class Chess {
     // 画棋子名称
     ctx.font = '22px serif'
     ctx.textBaseline = 'middle'
-    ctx.fillStyle = this.color
+    ctx.fillStyle = Color[this.color]
     let text = ctx.measureText(this.name)
     ctx.translate(x - text.width / 2, y)
     ctx.fillText(this.name, 0, 0)
@@ -77,15 +83,12 @@ class Chess {
     let distance = Math.sqrt(Math.pow((pos.x - x), 2) + Math.pow((pos.y - y), 2))
     return distance <= this.radius
   }
-  moveChessTo (point) {
+  moveTo (point) {
     this.point = point
   }
 }
 
 class General extends Chess {
-  moveTo (pos) {
-    this.point = pos
-  }
   isValidPos (pos) {
     if (this.color === -1) {
       if (pos.x >= 3 && pos.x <= 5 && pos.y >= 0 && pos.y <= 2) {
@@ -98,36 +101,114 @@ class General extends Chess {
     }
     return false
   }
+  canGo (point) {
+    return true
+  }
 }
 
 class Guard extends Chess {
-  moveTo (pos) {
-    this.point = pos
+  canGo (point) {
+    if (this.color === Config.Color.RED) {
+      if (point.y < 7) {
+        return false
+      }
+    } else {
+      if (point.y > 2) {
+        return false
+      }
+    }
+    if (point.x < 3 || point.x > 5) {
+      return false
+    }
+    if (this.point.distanceTo(point) === Math.SQRT2) {
+      return true
+    }
   }
 }
 class Bishop extends Chess {
-  moveTo (pos) {
-    this.point = pos
+  canGo (point) {
+    let dx = point.x - this.point.x
+    let dy = point.y - this.point.y
+    if (this.color === Config.Color.RED) {
+      if (point.y < 5) {
+        return false
+      }
+    } else {
+      if (point.y > 4) {
+        return false
+      }
+    }
+    let blockPoint = new Point(this.point.x + dx / 2, this.point.y + dy / 2)
+    if (this.game.findChess(blockPoint)) {
+      return false
+    }
+    if (dx * dy !== 0 && this.point.distanceTo(point) === Math.sqrt(8)) {
+      return true
+    }
   }
 }
 class Knight extends Chess {
-  moveTo (pos) {
-    this.point = pos
+  canGo (point) {
+    let dx = point.x - this.point.x
+    let dy = point.y - this.point.y
+    let absX = Math.abs(dx)
+    let absY = Math.abs(dy)
+
+    if (dx * dy !== 0 || absX + absY === 0) {
+      return false
+    }
+
+    if (absX > 0) {
+      for (let i = 1; i <= absX; i++) {
+        let blockPoint = new Point(this.point.x + dx * i / absX, this.point.y)
+        if (this.game.findChess(blockPoint)) {
+          return false
+        }
+      }
+    } else {
+      for (let i = 1; i <= absY; i++) {
+        let blockPoint = new Point(this.point.x, this.point.y + dx * i / absY)
+        if (this.game.findChess(blockPoint)) {
+          return false
+        }
+      }
+    }
+
+    return true
   }
 }
 class Rook extends Chess {
-  moveTo (pos) {
-    this.point = pos
+  canGo (point) {
+    let dx = point.x - this.point.x
+    let dy = point.y - this.point.y
+    // 是否符合行棋规则
+    if (dx * dy === 0 || this.point.distanceTo(point) !== Math.sqrt(5)) {
+      return false
+    }
+    // 是否拌马腿
+    let bx, by
+    if (Math.abs(dx) === 2) {
+      bx = this.point.x + dx / 2
+      by = this.point.y + dy
+    } else {
+      bx = this.point.x + dx
+      by = this.point.y + dy / 2
+    }
+    let blockPoint = new Point(bx, by)
+
+    if (this.game.findChess(blockPoint)) {
+      return false
+    }
   }
 }
 class Cannon extends Chess {
-  moveTo (pos) {
-    this.point = pos
+  canGo (point) {
+
   }
 }
 class Pawn extends Chess {
-  moveTo (pos) {
-    this.point = pos
+  canGo (point) {
+
   }
 }
 

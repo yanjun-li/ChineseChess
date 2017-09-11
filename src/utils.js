@@ -29,7 +29,7 @@
    let canvas = $(id)
    let rect = canvas.getBoundingClientRect()
    let [left, top] = [rect.left, rect.top]
-   let {x, y} = {x: e.pageX - left, y: e.pageY - top}
+   let {x, y} = {x: e.clientX - left, y: e.clientY - top}
    return {x, y}
  }
 /**
@@ -52,12 +52,12 @@
   * @param {num} y canvas pixel coord Y
   * @returns {Point} 返回棋盘网格坐标
   */
- function pixel2Point (x, y) {
+ function pixel2Point ({x, y}) {
    const TOL = 0.25
    let config = Config.BoardConfig
   // 坐标原点偏移后的坐標
-   x = (x - config.offsetX) / config.interval
-   y = (y - config.offsetY) / config.interval
+   x = (x - config.offset.x) / config.interval
+   y = (y - config.offset.y) / config.interval
 
    let px = Math.round(x)
    let py = Math.round(y)

@@ -1,5 +1,6 @@
 import {Config} from './config'
 import Point from './Point'
+
 let Color = ['black', 'red']
 class Chess {
   constructor (color, role, point) {
@@ -89,20 +90,33 @@ class Chess {
 }
 
 class General extends Chess {
-  isValidPos (pos) {
-    if (this.color === -1) {
-      if (pos.x >= 3 && pos.x <= 5 && pos.y >= 0 && pos.y <= 2) {
+  canGo (point) {
+    let dx = point.x - this.point.x
+    let dy = point.y - this.point.y
+    let distance = this.point.distanceTo(point)
+    // 移动
+    if (this.color === Config.Color.RED) {
+      if (distance === 1 && point.x > 2 && point.x < 6 && point.y > 6) {
         return true
       }
     } else {
-      if (pos.x >= 3 && pos.x <= 5 && pos.y >= 7 && pos.y <= 9) {
+      if (distance === 1 && point.x > 2 && point.x < 6 && point.y < 3) {
         return true
       }
     }
-    return false
-  }
-  canGo (point) {
-    return true
+    // 吃对方将
+    let rltChess = this.game.findChess(point)
+    if (rltChess.role === 7) {
+      if (distance > 1 && dx === 0) {
+        for (let i = 1; i <= Math.abs(dy); i++) {
+          let blockPoint = new Point(this.point.x + dx * i / absX, this.point.y)
+          if (this.game.findChess(blockPoint)) {
+            return false
+          }
+        }
+        return true
+      }
+    }
   }
 }
 
@@ -203,12 +217,75 @@ class Rook extends Chess {
 }
 class Cannon extends Chess {
   canGo (point) {
+    let dx = point.x - this.point.x
+    let dy = point.y - this.point.y
+    let absX = Math.abs(dx)
+    let absY = Math.abs(dy)
 
+    if (dx * dy !== 0 || absX + absY === 0) {
+      return false
+    }
+    // 吃棋
+    let rltChess = this.game.findChess(point)
+    if (rltChess && rltChess.color !== this.game.currentColor) {
+      if (absX > 0) {
+        for (let i = 1; i <= absX; i++) {
+          let blockPoint = new Point(this.point.x + dx * i / absX, this.point.y)
+          if (this.game.findChess(blockPoint)) {
+            return true
+          }
+        }
+      } else {
+        for (let i = 1; i <= absY; i++) {
+          let blockPoint = new Point(this.point.x, this.point.y + dx * i / absY)
+          if (this.game.findChess(blockPoint)) {
+            return true
+          }
+        }
+      }
+    } else {
+      if (absX > 0) {
+        for (let i = 1; i <= absX; i++) {
+          let blockPoint = new Point(this.point.x + dx * i / absX, this.point.y)
+          if (this.game.findChess(blockPoint)) {
+            return false
+          }
+        }
+      } else {
+        for (let i = 1; i <= absY; i++) {
+          let blockPoint = new Point(this.point.x, this.point.y + dx * i / absY)
+          if (this.game.findChess(blockPoint)) {
+            return false
+          }
+        }
+      }
+    }
+    return true
   }
 }
 class Pawn extends Chess {
   canGo (point) {
-
+    let dx = point.x - this.point.x
+    let dy = point.y - this.point.y
+    let distance = this.point.distanceTo(point)
+    if (this.color === Config.Color.RED) {
+      // 未过河
+      if (this.point.y > 4 && dx === 0 && dy === -1) {
+        return true
+      }
+      // 过河
+      if (this.point.y <= 4 && distance === 1 && (dx === 1 || dx === -1 || dy === -1)) {
+        return true
+      }
+    } else {
+      if (this.point.y < 5 && dx === 0 && dy === -1) {
+        return true
+      }
+      // 过河
+      if (this.point.y >= 5 && distance === 1 && (dx === 1 || dx === -1 || dy === 1)) {
+        return true
+      }
+    }
   }
 }
 

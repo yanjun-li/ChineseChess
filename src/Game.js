@@ -1,8 +1,9 @@
 import * as Chesses from './Chess'
 import * as utils from './utils'
-import Point from './Point'
+
 import ChessBoard from './ChessBoard'
 import {Config} from './config'
+import Point from './Point'
 
 export class Game {
   constructor (id = 'chess', {width = 500, height = 500} = {}) {
@@ -48,7 +49,7 @@ export class Game {
       if (clickChess) {
         if (clickChess.color === this.currentColor) {
           this.setActiveChess(clickChess)
-        } else {
+        } else if (!this.activeChess) {
           console.log(`此时应该是${this.currentColor === Config.Color.RED ? '红' : '黑'}方行棋`)
         }
       }
@@ -145,10 +146,10 @@ export class Game {
     }
   }
   findChess (point) {
-    let index = this.chessList.findIndex(chess => {
+    let rltsChess = this.chessList.findIndex(chess => {
       return chess.point.equals(point)
     })
-    return index > -1
+    return rltsChess || false
   }
   isInBoard (pos) {
     let bool = true

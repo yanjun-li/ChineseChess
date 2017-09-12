@@ -14,7 +14,7 @@ export class Game {
     this.canvas = null
     this.board = null
     this._chessList = []
-    this.currentColor = Config.Color.RED
+    this.currentColor = Config.Color.BLACK
     this.activeChess = null
   }
   get chessList () {
@@ -45,16 +45,8 @@ export class Game {
         .find(chess => {
           return chess.isInChess(pixelPos)
         })
-      // 选定行棋棋子
-      if (clickChess) {
-        if (clickChess.color === this.currentColor) {
-          this.setActiveChess(clickChess)
-        } else if (!this.activeChess) {
-          console.log(`此时应该是${this.currentColor === Config.Color.RED ? '红' : '黑'}方行棋`)
-        }
-      }
       // 行棋
-      if (this.activeChess) {
+      if (this.activeChess && (!clickChess || clickChess.color !== this.currentColor)) {
         let point = null
         if (clickChess && clickChess.color !== this.currentColor) {
           point = clickChess.point
@@ -64,9 +56,24 @@ export class Game {
         if (this.chickValid(point) && this.activeChess.canGo(point)) {
           this.moveChess(this.activeChess, point)
           this.moveEnd()
+          this.update()
+          this.isGameOver()
+          return true
+        } else {
+          console.log('不可行至此处！')
         }
       }
-      this.update()
+      /* attention: 多入口条件语句，改变另一入口条件状态的不可写在前边,或者进入分支后直接return退出 */
+      // 选定行棋棋子
+      if (clickChess) {
+        if (clickChess.color === this.currentColor) {
+          this.setActiveChess(clickChess)
+          this.update()
+          return true
+        } else if (!this.activeChess) {
+          console.log(`此时应该是${this.currentColor === Config.Color.RED ? '红' : '黑'}方行棋`)
+        }
+      }
     }.bind(this)
     this.canvas.addEventListener('click', clickHandler)
   }
@@ -109,8 +116,7 @@ export class Game {
     })
     if (!occupyChess) {
       mChess.moveTo(point)
-    }
-    if (mChess.color !== this.currentColor) {
+    } else if (occupyChess.color !== this.currentColor) {
       occupyChess.isDefeated = true
       mChess.moveTo(point)
     }
@@ -121,6 +127,7 @@ export class Game {
     this.chessList.forEach(chess => {
       chess.render(this.board)
     })
+    // this.isGameOver()
   }
   moveEnd () {
     this.activeChess.isActive = false
@@ -146,10 +153,10 @@ export class Game {
     }
   }
   findChess (point) {
-    let rltsChess = this.chessList.findIndex(chess => {
+    let rltChess = this.chessList.find(chess => {
       return chess.point.equals(point)
     })
-    return rltsChess || false
+    return rltChess || false
   }
   isInBoard (pos) {
     let bool = true
@@ -162,5 +169,14 @@ export class Game {
       bool = false
     }
     return bool
+  }
+  isGameOver () {
+    let loser = this._chessList.find(chess => {
+      return chess.role === 7 && chess.isDefeated
+    })
+    if (loser) {
+      let color = loser.color === Config.Color.RED ? '红' : '黑'
+      alert(`${color}方获得胜利！`)
+    }
   }
 }

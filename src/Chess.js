@@ -106,10 +106,11 @@ class General extends Chess {
     }
     // 吃对方将
     let rltChess = this.game.findChess(point)
+    let absY = Math.abs(dy)
     if (rltChess.role === 7) {
       if (distance > 1 && dx === 0) {
-        for (let i = 1; i <= Math.abs(dy); i++) {
-          let blockPoint = new Point(this.point.x + dx * i / absX, this.point.y)
+        for (let i = 1; i < Math.abs(dy); i++) {
+          let blockPoint = new Point(this.point.x, this.point.y + dy * i / absY)
           if (this.game.findChess(blockPoint)) {
             return false
           }
@@ -173,14 +174,14 @@ class Knight extends Chess {
     }
 
     if (absX > 0) {
-      for (let i = 1; i <= absX; i++) {
+      for (let i = 1; i < absX; i++) {
         let blockPoint = new Point(this.point.x + dx * i / absX, this.point.y)
         if (this.game.findChess(blockPoint)) {
           return false
         }
       }
     } else {
-      for (let i = 1; i <= absY; i++) {
+      for (let i = 1; i < absY; i++) {
         let blockPoint = new Point(this.point.x, this.point.y + dx * i / absY)
         if (this.game.findChess(blockPoint)) {
           return false
@@ -203,9 +204,9 @@ class Rook extends Chess {
     let bx, by
     if (Math.abs(dx) === 2) {
       bx = this.point.x + dx / 2
-      by = this.point.y + dy
+      by = this.point.y
     } else {
-      bx = this.point.x + dx
+      bx = this.point.x
       by = this.point.y + dy / 2
     }
     let blockPoint = new Point(bx, by)
@@ -213,6 +214,7 @@ class Rook extends Chess {
     if (this.game.findChess(blockPoint)) {
       return false
     }
+    return true
   }
 }
 class Cannon extends Chess {
@@ -229,14 +231,14 @@ class Cannon extends Chess {
     let rltChess = this.game.findChess(point)
     if (rltChess && rltChess.color !== this.game.currentColor) {
       if (absX > 0) {
-        for (let i = 1; i <= absX; i++) {
+        for (let i = 1; i < absX; i++) {
           let blockPoint = new Point(this.point.x + dx * i / absX, this.point.y)
           if (this.game.findChess(blockPoint)) {
             return true
           }
         }
       } else {
-        for (let i = 1; i <= absY; i++) {
+        for (let i = 1; i < absY; i++) {
           let blockPoint = new Point(this.point.x, this.point.y + dx * i / absY)
           if (this.game.findChess(blockPoint)) {
             return true
@@ -245,14 +247,14 @@ class Cannon extends Chess {
       }
     } else {
       if (absX > 0) {
-        for (let i = 1; i <= absX; i++) {
+        for (let i = 1; i < absX; i++) {
           let blockPoint = new Point(this.point.x + dx * i / absX, this.point.y)
           if (this.game.findChess(blockPoint)) {
             return false
           }
         }
       } else {
-        for (let i = 1; i <= absY; i++) {
+        for (let i = 1; i < absY; i++) {
           let blockPoint = new Point(this.point.x, this.point.y + dx * i / absY)
           if (this.game.findChess(blockPoint)) {
             return false
@@ -278,7 +280,7 @@ class Pawn extends Chess {
         return true
       }
     } else {
-      if (this.point.y < 5 && dx === 0 && dy === -1) {
+      if (this.point.y < 5 && dx === 0 && dy === 1) {
         return true
       }
       // 过河

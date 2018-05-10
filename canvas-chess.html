@@ -1,0 +1,785 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"  dir="ltr" lang="zh-CN">
+  <head>
+    <title>Canvas based Chinese Chess</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+	<style type="text/css">
+html,body{margin:0;padding:0;width:100%;height:100%;}
+body{background:#eee;}
+#main{margin:20px auto;width:460px;}
+canvas{margin:0 auto;width:auto;border:2px solid #ddd;}
+	</style>
+	<script type="text/javascript">
+
+/**
+ * This code comes from jQuery, it supports class extending.
+ *
+ */
+// Inspired by base2 and Prototype
+(function() {
+	var initializing = false,
+		fnTest = /xyz/.test(function() {
+			xyz;
+		}) ? /\b_super\b/ : /.*/;
+	// The base Class implementation (does nothing)
+	this.Class = function() {};
+	// Create a new Class that inherits from this class
+	Class.extend = function(prop) {
+		var _super = this.prototype;
+		// Instantiate a base class (but only create the instance,
+		// don't run the create constructor)
+		initializing = true;
+		var prototype = new this();
+		initializing = false;
+		// Copy the properties over onto the new prototype
+		for (var name in prop) {
+			// Check if we're overwriting an existing function
+			prototype[name] = typeof prop[name] == "function" && typeof _super[name] == "function" && fnTest.test(prop[name]) ? (function(name, fn) {
+				return function() {
+					var tmp = this._super;
+					// Add a new ._super() method that is the same method
+					// but on the super-class
+					this._super = _super[name];
+					// The method only need to be bound temporarily, so we
+					// remove it when we're done executing
+					var ret = fn.apply(this, arguments);
+					this._super = tmp;
+					return ret;
+				};
+			})(name, prop[name]) : prop[name];
+		}
+		// The dummy class constructor
+
+		function Class() {
+			// All construction is actually done in the create method
+			if (!initializing && this.create) this.create.apply(this, arguments);
+		}
+		// Populate our constructed prototype object
+		Class.prototype = prototype;
+		// Enforce the constructor to be what we expect
+		Class.constructor = Class;
+		// And make this class extendable
+		Class.extend = arguments.callee;
+		return Class;
+	};
+})();
+
+/**
+ * Point
+ */
+var Point = Class.extend({
+	x: 0,
+	y: 0,
+	create: function(x, y) {
+		this.x = x;
+		this.y = y;
+	},
+	move: function(dx, dy) {
+		this.x += dx;
+		this.y += dy;
+	},
+	moveTo: function(x, y) {
+		this.x = x;
+		this.y = y;
+	},
+	equals: function(point){
+		return this.x == point.x && this.y == point.y;
+	},
+	toString: function() {
+		return "(" + this.x + ", " + this.y + ")";
+	}
+});
+
+/**
+ * Rectangle
+ */
+var Rect = Class.extend({
+	left: 0,
+	top: 0,
+	right: 0,
+	bottom: 0,
+	create: function(left, top, right, bottom) {
+		this.left = left;
+		this.top = top
+		this.right = right;
+		this.bottom = bottom;
+	},
+	width: function() {
+		return this.right - this.left;
+	},
+	height: function() {
+		return this.bottom - this.top;
+	},
+	move: function(dx, dy) {
+		this.left += dx;
+		this.right += dx;
+		this.top += dy;
+		this.bottom += dy;
+	},
+	moveTo: function(x, y) {
+		this.right = x + this.width();
+		this.bottom = y + this.height();
+		this.left = x;
+		this.top = y;
+	},
+	// test if the given point is inside the rectangle.
+	isPointIn: function(point) {
+		return this.left <= point.x && this.right > point.x && this.top <= point.y && this.bottom > point.y;
+	},
+	// test if the given rectangle is overlap with itself.
+	isOverlap: function(rc) {
+		return !(this.left >= rc.right || this.right <= rc.left || this.top >= rc.bottom || this.bottom <= rc.top);
+	},
+	equals: function(rc){
+		return this.left == rc.left && this.top == rc.top && this.right == rc.right && this.bottom == rc.bottom;
+	},
+	toString: function() {
+		return "[" + this.left + ", " + this.top + ", " + this.right + ", " + this.bottom + "]";
+	}
+});
+
+/**
+ * Widget is the base canvas object.
+ *
+ */
+var Widget = Class.extend({
+	id: null,
+	parent: null,
+	children: null,
+	offsetRect: null,
+	canvas: null,
+	create: function(id, parent, canvas) {
+		this.id = id || "_id_"+Math.random();
+		// console.log(this+": create("+id+", " + parent + ", " + canvas + ")");
+		this.parent = parent;
+		this.canvas = canvas||(this.parent ? this.parent.canvas : null);
+		this.children = new Array();
+		this.offsetRect = new Rect(0, 0, 0, 0);
+		if (this.parent != null) this.parent.addChild(this);
+	},
+	init: function() {
+		// console.log(this+": init()");
+		this.eachChild(function(el) {
+			el.onPaint();
+		});
+	},
+	onMouseDown: function(point) {
+		// console.log(this+": onMouseDown(" + point + ")");
+		this.eachChild(function(el) {
+			if(el.hitTest(point)) {
+				el.onMouseDown(point);
+				return true;
+			} else {
+				return false;
+			}
+		}, true);
+	},
+	onMouseUp: function(point) {
+		// console.log(this+": onMouseUp(" + point + ")");
+		this.eachChild(function(el) {
+			if(el.hitTest(point)) {
+				el.onMouseUp(point);
+				return true;
+			} else {
+				return false;
+			}
+		}, true);
+	},
+	onMouseMove: function(point) {
+		//console.log(this+": onMouseMove(" + point + ")");
+		this.eachChild(function(el) {
+			return el.onMouseMove(point);
+		}, true);
+	},
+	onPaint: function(canvas) {
+		// console.log(this+": onPaint(" + canvas + ")");
+		//this.eachChild(function(el) {
+		//	el.onPaint();
+		//});
+	},
+	addChild: function(child) {
+		// console.log(this+": addChild(" + child + ")");
+		if(!this.hasChild(child)) {
+			this.children.push(child);
+		}
+		child.parent = this;
+	},
+	hasChild: function(child) {
+		// console.log(this+": hasChild(" + child + ")");
+		for(var i = 0; i < this.children.length; i++){
+			if(this.children[i] == child) return true;
+		}
+		return false;
+	},
+	eachChild: function(callback, reverse) {
+		if (reverse) {
+			for(var i = this.children.length - 1; i >= 0; i--) {
+				if(callback(this.children[i])) break;
+			}
+		} else {
+			for(var i = 0; i < this.children.length; i++) {
+				if(callback(this.children[i])) break;
+			}
+		}
+	},
+	moveChildToTop: function(child) {
+		// console.log(this+": moveChildToTop(" + child + ")");
+		child = this.removeChild(child);
+		if(child != null) this.children.push(child);
+	},
+	removeChild: function(child) {
+		// console.log(this+": removeChild(" + child + ")");
+		for(var i = 0; i < this.children.length; i++){
+			if(this.children[i] == child) return this.children.splice(i, 1)[0];
+		}
+	},
+	hitTest: function(point) {
+		// console.log(this+": hitTest(" + point + ")");
+		return this.offsetRect.isPointIn(point);
+	},
+	show: function() {
+		// console.log(this+": show()");
+		this.redraw();
+	},
+	redraw: function() {
+		// console.log(this+": redraw()");
+		this.onPaint();
+		this.eachChild(function(el) {
+			el.redraw();
+		});
+	},
+	onDestroy: function() {
+		// console.log(this+": onDestroy()");
+		this.eachChild(function(el) {
+			el.onDestroy();
+		});
+		// TODO self destroy
+		this.children = [];
+		if (this.parent != null) this.parent.removeChild(this);
+	},
+	toString: function(){
+		return this.id;
+	}
+});
+
+var RootWidget = Widget.extend({
+	create: function(id, canvas){
+		this._super(id, null, canvas);
+	},
+	init: function(){
+		var _this = this;
+		this.canvas.onmousemove = this.canvas.ontouchmove = function(e){
+			e=e||window.event;
+			_this.onMouseMove(_this.getFixedMousePoint(e, _this.canvas));
+		};
+		this.canvas.onmousedown = this.canvas.ontouchstart = function(e){
+			e=e||window.event;
+			_this.onMouseDown(_this.getFixedMousePoint(e, _this.canvas));
+		};
+		this.canvas.onmouseup = this.canvas.ontouchend = function(e){
+			e=e||window.event;
+			_this.onMouseUp(_this.getFixedMousePoint(e, _this.canvas));
+		};
+		this.getFixedMousePoint = function(e, dom){
+			var x = e.pageX - dom.offsetLeft;
+			var y = e.pageY - dom.offsetTop;
+			/*
+			var n = dom;
+			while(n != document){
+				x -= n.offsetLeft;
+				y -= n.offsetTop;
+				n = n.parentNode;
+			}
+			*/
+			return new Point(x, y);
+		};
+		document.onkeydown = function(e){
+			e=e||window.event;
+			_this.onKeyDown(e);
+		}
+		document.onkeyup = function(e){
+			e=e||window.event;
+			_this.onKeyUp(e);
+		}
+	}
+});	</script>
+	<script type="text/javascript">
+function ChessGame(boardId) {
+	var layout = {
+		padding: 30,
+		cell: 50,
+		chessRadius: 20,
+		fontSize: 36,
+		width: 400,
+		height: 450,
+		offsetWidth: 460,
+		offsetHeight: 510
+	};
+	var style = {
+		board: {
+			border: "#630",
+			background: "#fed",
+			font: "36px 隶书"
+		},
+		chess: [
+			/* Red */{
+				border: "#fa8",
+				background: "#fc9",
+				font: "36px 隶书",
+				fontColor: "#c00"
+			},
+			/* Green */{
+				border: "#fa8",
+				background: "#fc9",
+				font: "36px 隶书",
+				fontColor: "#090"
+			}
+		]
+	};
+	var Board = RootWidget.extend({
+		campOrder: 1, /* camp = 1 will be shown on the up side of the board */
+		mover: 0,
+		init: function(){
+			this.offsetRect.left = 0;
+			this.offsetRect.top = 0;
+			this.offsetRect.right = 460;
+			this.offsetRect.bottom = 510;
+			this._super();
+		},
+		findChess: function(pos){
+			if(!this.isValidPos(pos))
+				return null;
+			for(var i = 0; i < this.children.length; i++){
+				var child = this.children[i];
+				if(child instanceof Chess && child.pos != null && child.pos.equals(pos))
+					return child;
+			}
+			return null;
+		},
+		moveChess: function(chess, pos){
+			this.removeChess(pos);
+			chess.pos = pos;
+			this.mover = 1- chess.camp;
+		},
+		removeChess: function(pos){
+			var chess = this.findChess(pos);
+			if(chess != null)
+				this.removeChild(chess);
+		},
+		isValidPos: function(pos){
+			return pos != null && pos.x >= 0 && pos.x < 9 && pos.y >= 0 && pos.y < 10;
+		},
+		isInsideCamp: function(pos, camp){
+			if(!this.isValidPos(pos))
+				return false;
+			if(camp == this.campOrder){
+				return pos.y <= 4;
+			} else {
+				return pos.y >= 5;
+			}
+		},
+		
+		isInsidePalace: function(pos, camp){
+			if(!this.isValidPos(pos))
+				return false;
+			if(pos.x < 3 || pos.x > 5)
+				return false;
+			if(camp == this.campOrder){
+				return pos.y <= 2;
+			} else {
+				return pos.y >= 7;
+			}
+		},
+		onPaint: function() {
+			var ctx = this.canvas.getContext('2d');
+			// draw background
+			ctx.fillStyle=style.board.background;
+			ctx.beginPath();
+			ctx.rect(0, 0, layout.offsetWidth, layout.offsetHeight);
+			ctx.fill();
+			ctx.closePath();
+			// prepare to draw lines
+			var p = layout.padding,
+				s = layout.cell,
+				w = layout.width,
+				h = layout.height;
+			ctx.strokeStyle=style.board.border;
+			ctx.lineWidth=2;
+			ctx.beginPath();
+			// horizonal lines
+			for(var i = 0; i < 10; i++){
+				ctx.moveTo(p, s * i + p);
+				ctx.lineTo(w + p, s * i + p);
+			}
+			// vertical lines
+			ctx.moveTo(p, p);
+			ctx.lineTo(p, h + p);
+			ctx.moveTo(w + p, p);
+			ctx.lineTo(w + p, h + p);
+			for(var i = 1; i < 8; i++){
+				ctx.moveTo(s * i + p, p);
+				ctx.lineTo(s * i + p, s * 4 + p);
+				ctx.moveTo(s * i + p, s * 5 + p);
+				ctx.lineTo(s * i + p, h + p);
+			}
+			// "X" shapes
+			ctx.moveTo(s * 3 + p, p);
+			ctx.lineTo(s * 5 + p, s * 2 + p);
+			ctx.moveTo(s * 5 + p, 0 + p);
+			ctx.lineTo(s * 3 + p, s * 2 + p);
+			ctx.moveTo(s * 3 + p, s * 7 + p);
+			ctx.lineTo(s * 5 + p, s * 9 + p);
+			ctx.moveTo(s * 5 + p, s * 7 + p);
+			ctx.lineTo(s * 3 + p, s * 9 + p);
+
+			ctx.stroke();
+			ctx.closePath();
+			
+			// 楚河汉界
+			ctx.font=style.board.font;
+			ctx.fillStyle=style.board.border;
+			ctx.textAlign="center";
+			ctx.textBaseline="middle";
+			ctx.fillText("楚河", p + s * 2, p + s * 4.5);
+			ctx.fillText("漢界", p + s * 6, p + s * 4.5);
+		}
+	});
+
+	var Chess = Widget.extend({
+		name: null,
+		camp: null,
+		pos: null,
+		isDragging: false,
+		targetPos: null,
+		targetIndicatorAlpha: 0.2,
+		create: function(id, parent, name, camp, pos){
+			this._super(id, parent);
+			this.name = name;
+			this.camp = camp || 0;
+			this.pos = pos || new Point(0, 0);
+			this.offsetRect.left = layout.padding + layout.cell * this.pos.x - layout.cell/2;
+			this.offsetRect.top = layout.padding + layout.cell * this.pos.y - layout.cell/2;
+			this.offsetRect.right = this.offsetRect.left + layout.cell;
+			this.offsetRect.bottom = this.offsetRect.top + layout.cell;
+		},
+		onPaint: function() {
+			var ctx = this.canvas.getContext('2d');
+			ctx.fillStyle = style.chess[this.camp].background;
+			ctx.strokeStyle = style.chess[this.camp].border;
+			ctx.font = style.chess[this.camp].font;
+			var x = this.offsetRect.left + layout.cell / 2,
+				y = this.offsetRect.top + layout.cell / 2;
+			// draw shadow
+			ctx.beginPath();
+			ctx.fillStyle = "rgba(0, 0, 0, 0.2)";
+			if(this.isDragging)
+				ctx.arc(x + 2, y + 4, layout.chessRadius + 1, 0, 360);
+			else
+				ctx.arc(x + 1, y + 2, layout.chessRadius + 1, 0, 360);
+			ctx.fill();
+			ctx.fillStyle = style.chess[this.camp].background;
+			ctx.closePath();
+			// draw target indicator while dragging.
+			if(this.targetPos != null && this.targetIndicatorAlpha > 0){
+				ctx.beginPath();
+				ctx.fillStyle = "rgba(0, 128, 0, "+this.targetIndicatorAlpha+")";
+				ctx.arc(
+					layout.padding + this.targetPos.x * layout.cell,
+					layout.padding + this.targetPos.y * layout.cell,
+					layout.cell / 2,
+					0, 360
+				);
+				ctx.fill();
+				ctx.fillStyle = style.chess[this.camp].background;
+				ctx.closePath();
+			}
+			ctx.beginPath();
+			ctx.arc(x, y, layout.chessRadius, 0, 360);
+			ctx.fill();
+			ctx.textAlign="center";
+			ctx.textBaseline="middle";
+			ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+			ctx.fillText(this.name, x + 1, y - layout.fontSize / 16 + 1);
+			ctx.fillStyle = style.chess[this.camp].fontColor;
+			ctx.fillText(this.name, x, y - layout.fontSize / 16);
+			ctx.stroke();
+			ctx.closePath();
+		},
+		onMouseDown: function(point) {
+			if(this.parent.mover == this.camp){
+				this.isDragging = true;
+				this.parent.moveChildToTop(this);
+				this.parent.redraw();
+			}
+		},
+		onMouseMove: function(point) {
+			if(this.isDragging){
+				var x = point.x - layout.cell / 2, y = point.y - layout.cell / 2;
+				this.offsetRect.moveTo(x, y);
+				var pos = this.point2point2chessPos(x, y);
+				if(this.isTargetValid(pos))
+					this.targetPos = pos;
+				else
+					this.targetPos = null;
+				this.parent.redraw();
+			}
+		},
+		onMouseUp: function(point) {
+			if(this.isDragging){
+				this.isDragging = false;
+				var pos = this.targetPos || this.pos;
+				//this.targetPos = null;
+				this.moveTo(pos);
+				if(this.targetPos != null){
+					this.parent.moveChess(this, pos);
+				}
+			}
+		},
+		// mouse point (relative to canvas tag) to logical chess position.
+		point2chessPos: function(x, y){
+			return new Point(
+				Math.ceil((x - layout.padding) / layout.cell),
+				Math.ceil((y - layout.padding) / layout.cell)
+			);
+		},
+		chessPos2point: function(x, y){
+		},
+		moveTo: function(pos){
+			var left = layout.padding + layout.cell * pos.x - layout.cell/2,
+				top = layout.padding + layout.cell * pos.y - layout.cell/2;
+			var dx = left - this.offsetRect.left,
+				dy = top - this.offsetRect.top;
+			var t = 0, c = 15, _this = this;
+			var timer = setInterval(function(){
+				if(++t > c) {
+					clearInterval(timer);
+					_this.pos = pos;
+					_this.offsetRect.moveTo(left, top);
+					_this.targetPos = null;
+					_this.targetIndicatorAlpha = 0.2;
+					//_this.parent.redraw();
+					return;
+				}
+				var ratio = 0;
+				if(t <= c / 2) {
+					ratio = 2 * t / c;
+					ratio = 1 - 0.5 * ratio * ratio * ratio * ratio;
+				} else {
+					ratio = 2 - 2 * t / c;
+					ratio = 0.5 * ratio * ratio * ratio * ratio;
+				}
+				_this.offsetRect.moveTo(left - dx * ratio, top - dy * ratio);
+				_this.targetIndicatorAlpha = 0.2 * ratio;
+				_this.parent.redraw();
+			}, 40);
+		},
+		// Please override this function in subclass.
+		isTargetValid: function(pos){
+			if(!this.parent.isValidPos(pos))
+				return false;
+			var chess = this.parent.findChess(pos);
+			return chess == null || chess.camp != this.camp;
+		}
+	});
+	var Chariot = Chess.extend({
+		create: function(id, parent, camp, pos){
+			this._super(id, parent, "車", camp, pos);
+		},
+		isTargetValid: function(pos){
+			if(!this._super(pos))
+				return false;
+			// “車”行棋逻辑判断
+			var dx = pos.x - this.pos.x, dy = pos.y - this.pos.y;
+			if(dx != 0 && dy != 0)
+				return false;
+			var targetChess = this.parent.findChess(pos);
+			// 路上是否有别的子
+			var steps = Math.max(Math.abs(dx), Math.abs(dy));
+			var blockPos = new Point(this.pos.x, this.pos.y);
+			for(var i = 1; i < steps; i++){
+				blockPos.x += dx / steps;
+				blockPos.y += dy / steps;
+				if(this.parent.findChess(blockPos) != null)
+					return false;
+			}
+			return true;
+		}
+	});
+	var Horse = Chess.extend({
+		create: function(id, parent, camp, pos){
+			this._super(id, parent, "馬", camp, pos);
+		},
+		isTargetValid: function(pos){
+			if(!this._super(pos))
+				return false;
+			// “马”行棋逻辑判断
+			var dx = pos.x - this.pos.x, dy = pos.y - this.pos.y;
+			if(dx == 0 || dy == 0 || Math.abs(dx) + Math.abs(dy) != 3)
+				return false;
+			var targetChess = this.parent.findChess(pos);
+			// 是否有绊马腿
+			var blockPos = new Point(this.pos.x, this.pos.y);
+			if(Math.abs(dx) == 2)
+				blockPos.x += dx / 2;
+			else
+				blockPos.y += dy / 2;
+			return this.parent.findChess(blockPos) == null;
+		}
+	});
+	var Elephant = Chess.extend({
+		create: function(id, parent, camp, pos){
+			this._super(id, parent, camp == 0 ? "相" : "象", camp, pos);
+		},
+		isTargetValid: function(pos){
+			if(!this._super(pos))
+				return false;
+			// “象”行棋逻辑判断
+			if(!this.parent.isInsideCamp(pos, this.camp))
+				return false;
+			var dx = pos.x - this.pos.x, dy = pos.y - this.pos.y;
+			if(Math.abs(dx) != 2 || Math.abs(dy) != 2)
+				return false;
+			// 是否有绊象腿
+			var blockPos = new Point(this.pos.x + dx / 2, this.pos.y + dy / 2);
+			return this.parent.findChess(blockPos) == null;
+		}
+	});
+	var Guard = Chess.extend({
+		create: function(id, parent, camp, pos){
+			this._super(id, parent, camp == 0 ? "士" : "仕", camp, pos);
+		},
+		isTargetValid: function(pos){
+			if(!this._super(pos))
+				return false;
+			// “士”行棋逻辑判断
+			if(!this.parent.isInsidePalace(pos, this.camp))
+				return false;
+			var dx = pos.x - this.pos.x, dy = pos.y - this.pos.y;
+			if(Math.abs(dx) != 1 || Math.abs(dy) != 1)
+				return false;
+			return true;
+		}
+	});
+	var General = Chess.extend({
+		create: function(id, parent, camp, pos){
+			this._super(id, parent, camp == 0 ? "帥" : "將", camp, pos);
+		},
+		isTargetValid: function(pos){
+			if(!this._super(pos))
+				return false;
+			// “将”行棋逻辑判断
+			if(!this.parent.isInsidePalace(pos, this.camp))
+				return false;
+			var dx = pos.x - this.pos.x, dy = pos.y - this.pos.y;
+			if(Math.abs(dx) + Math.abs(dy) != 1)
+				return false;
+			return true;
+		}
+	});
+	var Cannon = Chess.extend({
+		create: function(id, parent, camp, pos){
+			this._super(id, parent, camp == 0 ? "炮" : "砲", camp, pos);
+		},
+		isTargetValid: function(pos){
+			if(!this._super(pos))
+				return false;
+			// “炮”行棋逻辑判断
+			var dx = pos.x - this.pos.x, dy = pos.y - this.pos.y;
+			if(dx != 0 && dy != 0)
+				return false;
+			var targetChess = this.parent.findChess(pos);
+			// 路上越过几个子
+			var steps = Math.max(Math.abs(dx), Math.abs(dy));
+			var blockPos = new Point(this.pos.x, this.pos.y);
+			var blocks = 0;
+			for(var i = 1; i < steps; i++){
+				blockPos.x += dx / steps;
+				blockPos.y += dy / steps;
+				if(this.parent.findChess(blockPos) != null)
+					blocks++;
+			}
+			return (blocks == 0 && targetChess == null) || (blocks == 1 && targetChess != null);
+		}
+	});
+	var Pawn = Chess.extend({
+		create: function(id, parent, camp, pos){
+			this._super(id, parent, camp == 0 ? "兵" : "卒", camp, pos);
+		},
+		isTargetValid: function(pos){
+			if(!this._super(pos))
+				return false;
+			// “兵”行棋逻辑判断
+			var dx = pos.x - this.pos.x, dy = pos.y - this.pos.y;
+			if(this.parent.isInsideCamp(pos, this.camp) && dx != 0)
+				return false;
+			if(this.camp == this.parent.campOrder && dy < 0)
+				return false;
+			else if(this.camp != this.parent.campOrder && dy > 0)
+				return false;
+			if(Math.abs(dx) + Math.abs(dy) != 1)
+				return false;
+			return true;
+		}
+	});
+
+	var GameManager = Class.extend({
+	});
+	this.init = function(boardId){
+		var canvas = document.getElementById(boardId);
+		var board = new Board("chessBoard", canvas);
+		createChesses(board);
+		board.init();
+		board.show();
+	}
+	function createChesses(board){
+		/*RED*/{
+			(new Chariot("車01", board, 0, new Point(0, 9)));
+			(new Chariot("車02", board, 0, new Point(8, 9)));
+			(new Horse("馬01", board, 0, new Point(1, 9)));
+			(new Horse("馬02", board, 0, new Point(7, 9)));
+			(new Elephant("相01", board, 0, new Point(2, 9)));
+			(new Elephant("相02", board, 0, new Point(6, 9)));
+			(new Guard("士01", board, 0, new Point(3, 9)));
+			(new Guard("士02", board, 0, new Point(5, 9)));
+			(new General("帥00", board, 0, new Point(4, 9)));
+			(new Pawn("兵01", board, 0, new Point(0, 6)));
+			(new Pawn("兵02", board, 0, new Point(2, 6)));
+			(new Pawn("兵03", board, 0, new Point(4, 6)));
+			(new Pawn("兵04", board, 0, new Point(6, 6)));
+			(new Pawn("兵05", board, 0, new Point(8, 6)));
+			(new Cannon("炮01", board, 0, new Point(1, 7)));
+			(new Cannon("炮02", board, 0, new Point(7, 7)));
+		}
+		/*GREEN*/{
+			(new Chariot("車11", board, 1, new Point(0, 0)));
+			(new Chariot("車12", board, 1, new Point(8, 0)));
+			(new Horse("馬11", board, 1, new Point(1, 0)));
+			(new Horse("馬12", board, 1, new Point(7, 0)));
+			(new Elephant("象11", board, 1, new Point(2, 0)));
+			(new Elephant("象12", board, 1, new Point(6, 0)));
+			(new Guard("仕11", board, 1, new Point(3, 0)));
+			(new Guard("仕12", board, 1, new Point(5, 0)));
+			(new General("將10", board, 1, new Point(4, 0)));
+			(new Pawn("卒11", board, 1, new Point(0, 3)));
+			(new Pawn("卒12", board, 1, new Point(2, 3)));
+			(new Pawn("卒13", board, 1, new Point(4, 3)));
+			(new Pawn("卒14", board, 1, new Point(6, 3)));
+			(new Pawn("卒15", board, 1, new Point(8, 3)));
+			(new Cannon("砲11", board, 1, new Point(1, 2)));
+			(new Cannon("砲12", board, 1, new Point(7, 2)));
+		}
+	}
+
+	this.init(boardId);
+}	</script>
+  </head>
+ 
+  <body>
+  <div id="main">
+    <canvas id="board" width="460" height="510"></canvas>
+	</div>
+    <script type='text/javascript'>
+		var chessGame = new ChessGame("board");
+    </script>
+  </body>
+</html>

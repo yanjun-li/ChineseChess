@@ -140,6 +140,7 @@ export class Game {
     } else {
       this.currentColor = Config.Color.RED
     }
+    this.showMsg(`${this.currentColor}方行棋！`)
   }
   // 检查是否有我方棋子阻挡
   chickValid (point) {
@@ -176,7 +177,11 @@ export class Game {
     })
     if (loser) {
       let color = loser.color === Config.Color.RED ? '红' : '黑'
-      alert(`${color}方获得胜利！`)
+      console.log(`${color}方获得胜利！`)
+      this.showMsg(`${color}方获得胜利！`)
     }
+  }
+  showMsg (msg) {
+    document.getElementById('game-info').innerHTML = msg
   }
 }

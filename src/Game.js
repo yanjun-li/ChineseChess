@@ -7,9 +7,11 @@ import Point from './Point'
 
 export class Game {
   constructor (id = 'chess', {width = 500, height = 500} = {}) {
+    let interval = Config.BoardConfig.interval
+    let offset = Config.BoardConfig.offset
     this.id = id
-    this.width = width
-    this.height = height
+    this.width = interval * 8 + offset.x * 2
+    this.height = interval * 9 + offset.y * 2
 
     this.canvas = null
     this.board = null
@@ -135,12 +137,15 @@ export class Game {
     this.switchPlayer()
   }
   switchPlayer () {
+    let color
     if (this.currentColor === Config.Color.RED) {
       this.currentColor = Config.Color.BLACK
+      color = '黑'
     } else {
       this.currentColor = Config.Color.RED
+      color = '红'
     }
-    this.showMsg(`${this.currentColor}方行棋！`)
+    this.showMsg(`${color}方行棋！`)
   }
   // 检查是否有我方棋子阻挡
   chickValid (point) {
@@ -161,12 +166,15 @@ export class Game {
   }
   isInBoard (pos) {
     let bool = true
-    let minX = this.board.offset.x
-    let minY = this.board.offset.y
-    let maxX = this.board.offset.x + 8 * this.board.interval
-    let maxY = this.board.offset.y + 9 * this.board.interval
+    // let minX = this.board.offset.x
+    // let minY = this.board.offset.y
+    let maxX = this.board.offset.x * 2 + 8 * this.board.interval
+    let maxY = this.board.offset.y * 2 + 9 * this.board.interval
 
-    if (pos.x < minX || pos.x > maxX || pos.y < minY || pos.y > maxY) {
+    // if (pos.x < minX || pos.x > maxX || pos.y < minY || pos.y > maxY) {
+    //   bool = false
+    // }
+    if (pos.x < 0 || pos.x > maxX || pos.y < 0 || pos.y > maxY) {
       bool = false
     }
     return bool
@@ -176,12 +184,12 @@ export class Game {
       return chess.role === 7 && chess.isDefeated
     })
     if (loser) {
-      let color = loser.color === Config.Color.RED ? '红' : '黑'
+      let color = loser.color === Config.Color.RED ? '黑' : '红'
       console.log(`${color}方获得胜利！`)
       this.showMsg(`${color}方获得胜利！`)
     }
   }
   showMsg (msg) {
-    document.getElementById('game-info').innerHTML = msg
+    document.getElementById('geme-info').innerHTML = msg
   }
 }

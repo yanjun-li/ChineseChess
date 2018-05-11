@@ -1,4 +1,5 @@
 const path = require('path')
+const webpack = require('webpack')
 // const HtmlWebpackPlugin = require('html-webpack-plugin')
 const CleanWebpackPlugin = require('clean-webpack-plugin')
 module.exports = {
@@ -25,11 +26,12 @@ module.exports = {
     //   title: 'Chinese Chess',
     //   hash: true
     // }),
-    new CleanWebpackPlugin(['dist'])
+    new CleanWebpackPlugin(['dist']),
+    new webpack.NamedModulesPlugin()
   ],
   devtool: 'inline-source-map',
   devServer: {
-    hot: true,
+    open: true,
     contentBase: path.join(__dirname, 'src')
   }
 }

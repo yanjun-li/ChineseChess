@@ -55,7 +55,7 @@ export class Game {
         } else if (newPoint) {
           point = newPoint
         }
-        if (this.chickValid(point) && this.activeChess.canGo(point)) {
+        if (point && this.chickValid(point) && this.activeChess.canGo(point)) {
           this.moveChess(this.activeChess, point)
           this.moveEnd()
           this.update()

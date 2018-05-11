@@ -9,7 +9,6 @@ export default class ChessBoard {
   render () {
     let ctx = this.canvas.getContext('2d')
     ctx.translate(this.offset.x, this.offset.y)
-
     // 内部网格
     for (let j = 0; j < 9; j++) {
       if (j !== 4) {
@@ -21,7 +20,7 @@ export default class ChessBoard {
     // 最外边框
     ctx.save()
     ctx.beginPath()
-    ctx.lineWidth = 3
+    // ctx.lineWidth = 3
     ctx.strokeRect(0, 0, 8 * this.interval, 9 * this.interval)
     ctx.restore()
 

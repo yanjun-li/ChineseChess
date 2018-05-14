@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import * as Chesses from './Chess'
 import * as utils from './utils'
 
@@ -18,6 +19,7 @@ export class Game {
     this._chessList = []
     this.currentColor = Config.Color.BLACK
     this.activeChess = null
+    this.history = []
   }
   get chessList () {
     return this._chessList.filter(chess => {
@@ -28,15 +30,14 @@ export class Game {
     this.canvas = this.createCanvasEle()
     this.board = this.createBoard(this.id)
     this.board.render()
-
     Config.initChesses.forEach(val => {
       let chess = this.createChesses(val)
       chess.game = this
       this._chessList.push(chess)
       chess.render(this.board)
     })
-
-    // 棋盘点击响应函数
+    this.history.push(_.cloneDeep(this._chessList))
+    // 棋盘点击响应函数s
     let clickHandler = function (event) {
       let pixelPos = utils.getCanvasPos(event, this.id)
       if (!this.isInBoard(pixelPos)) {
@@ -59,6 +60,7 @@ export class Game {
           this.moveChess(this.activeChess, point)
           this.moveEnd()
           this.update()
+          this.history.push(_.cloneDeep(this._chessList))
           this.isGameOver()
           return true
         } else {
@@ -78,6 +80,42 @@ export class Game {
       }
     }.bind(this)
     this.canvas.addEventListener('click', clickHandler)
+
+    let restartBtn = document.getElementById('restart')
+    restartBtn.addEventListener('click', this.restart.bind(this))
+
+    let regretBtn = document.getElementById('regret')
+    regretBtn.addEventListener('click', this.regret.bind(this))
+  }
+  restart () {
+    this.clearCanvas()
+    this.board.render()
+
+    this._chessList = []
+    this.currentColor = Config.Color.BLACK
+    this.activeChess = null
+    Config.initChesses.forEach(val => {
+      let chess = this.createChesses(val)
+      chess.game = this
+      this._chessList.push(chess)
+      chess.render(this.board)
+    })
+  }
+  regret () {
+    console.log('regret')
+    if (this.history.length > 1) {
+      this.history.pop()
+      this._chessList = _.cloneDeep(this.history[this.history.length - 1])
+      this.switchPlayer()
+
+      this.clearCanvas()
+      this.board.render()
+      this.chessList.forEach(chess => {
+        chess.render(this.board)
+      })
+    } else {
+      console.log('已是初始状态')
+    }
   }
   createCanvasEle () {
     let canvasEle = document.createElement('canvas')

@@ -18,6 +18,27 @@
      deepFreeze(prop) // 递归调用.
    }
  }
+ function deepClone (object) {
+   let isArrayOrObject = (o) => {
+     return Array.isArray(object) || Object.prototype.toString.call(object) === '[object Object]'
+   }
+   let isArray = Array.isArray(object)
+
+   if (!isArrayOrObject(object)) {
+     return false
+   }
+   let copyObject = isArray ? [] : {}
+
+   for (let key in object) {
+     if (isArrayOrObject(object[key])) {
+       deepClone(object[key])
+     } else {
+       copyObject[key] = object[key]
+     }
+   }
+
+   return copyObject
+ }
  /**
   * 获取原始原点的canvas pixel crood
   *
@@ -69,4 +90,4 @@
      return null
    }
  }
- export {deepFreeze, getCanvasPos, point2Pixel, pixel2Point, $}
+ export {deepFreeze, deepClone, getCanvasPos, point2Pixel, pixel2Point, $}

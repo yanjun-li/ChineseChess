@@ -12,7 +12,7 @@
     "test": "mocha --ui qunit --compilers js:babel-core/register"
   },
   "author": "'liyanjun' ",
-  "email": "<'475509508@11.com'>",
+  "email": "<'475509508@qq.com'>",
   "license": "MIT",
   "devDependencies": {
     "babel-cli": "^6.24.1",

@@ -1,3 +1,4 @@
+import Print from './print'
 import _ from 'lodash'
 import * as Chesses from './Chess'
 import * as utils from './utils'
@@ -5,6 +6,7 @@ import * as utils from './utils'
 import ChessBoard from './ChessBoard'
 import {Config} from './config'
 import Point from './Point'
+
 
 export class Game {
   constructor (id = 'chess', {width = 500, height = 500} = {}) {

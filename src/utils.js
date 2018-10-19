@@ -54,7 +54,7 @@
    return {x, y}
  }
 /**
- * 根据棋盘点返回canva pixel 坐标值
+ * 根据棋盘点返回canva pixel 坐标de值
  *
  * @param {Point} point
  * @returns {Object} {x,y}

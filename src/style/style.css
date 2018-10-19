@@ -1,0 +1,9 @@
+.chess{
+  background-color: #fff;
+  border: 1px solid #000;
+}
+
+#geme-info{
+  text-align: center;
+  margin-bottom: 150px;
+}

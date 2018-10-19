@@ -1,4 +1,3 @@
-import Print from './print'
 import _ from 'lodash'
 import * as Chesses from './Chess'
 import * as utils from './utils'
@@ -9,7 +8,7 @@ import Point from './Point'
 
 
 export class Game {
-  constructor (id = 'chess', {width = 500, height = 500} = {}) {
+  constructor (id = 'chess') {
     let interval = Config.BoardConfig.interval
     let offset = Config.BoardConfig.offset
     this.id = id

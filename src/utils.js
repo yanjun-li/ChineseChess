@@ -19,8 +19,8 @@
    }
  }
  function deepClone (object) {
-   let isArrayOrObject = (o) => {
-     return Array.isArray(object) || Object.prototype.toString.call(object) === '[object Object]'
+   let isArrayOrObject = (obj) => {
+     return Array.isArray(obj) || Object.prototype.toString.call(obj) === '[object Object]'
    }
    let isArray = Array.isArray(object)
 

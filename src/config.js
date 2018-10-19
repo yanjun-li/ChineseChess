@@ -1,4 +1,4 @@
-import * as utils from './utils'
+// import * as utils from './utils'
 
 const Config = {
   BoardConfig: {
@@ -52,6 +52,6 @@ const Config = {
     [1, 1, 8, 6]
   ]
 }
-utils.deepFreeze(Config)
+// utils.deepFreeze(Config)
 
 export {Config}

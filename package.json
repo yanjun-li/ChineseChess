@@ -7,6 +7,7 @@
     "test": "test"
   },
   "scripts": {
+    "lint": "eslint src/*.js",
     "test": "jest",
     "dev": "webpack-dev-server --config webpack.dev.js",
     "build": "NODE_ENV=production webpack --config webpack.prod.js"
@@ -26,15 +27,16 @@
   },
   "homepage": "https://github.com/yanjun-li/ChineseChess#readme",
   "devDependencies": {
+    "clean-webpack-plugin": "~0.1.19",
+    "css-loader": "~1.0.0",
+    "eslint": "~5.7.0",
+    "html-webpack-plugin": "~3.2.0",
+    "style-loader": "~0.23.1",
     "webpack": "~4.20.2",
     "webpack-cli": "~3.1.2",
     "webpack-dev-server": "~3.1.9",
     "webpack-manifest-plugin": "~2.0.4",
-    "webpack-merge": "~4.1.4",
-    "css-loader": "~1.0.0",
-    "style-loader": "~0.23.1",
-    "clean-webpack-plugin": "~0.1.19",
-    "html-webpack-plugin": "~3.2.0"
+    "webpack-merge": "~4.1.4"
   },
   "dependencies": {
     "lodash": "~4.17.11"

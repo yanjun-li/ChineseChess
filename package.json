@@ -39,6 +39,7 @@
     "webpack-merge": "~4.1.4"
   },
   "dependencies": {
+    "jest": "~23.6.0",
     "lodash": "~4.17.11"
   }
 }

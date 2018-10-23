@@ -4,7 +4,7 @@
 [![codecov](https://codecov.io/gh/yanjun-li/ChineseChess/branch/master/graph/badge.svg)](https://codecov.io/gh/yanjun-li/ChineseChess)
 
 这是一个Chinese Chess
- [demo](https://yanjun-li.github.io/ChineseChess/src/index.html)  
+ [demo](https://yanjun-li.github.io/ChineseChess/)  
 
  TODO:
  - [x] 优化项目结构

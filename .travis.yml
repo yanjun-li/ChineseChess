@@ -2,7 +2,8 @@ language: node_js
 node_js:
   - "8"
 install:
-  - npm i -g codecov
+  - npm install -g codecov
+  - npm install
 script:
   - npm run lint
   - npm run test

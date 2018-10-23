@@ -182,7 +182,7 @@ class Knight extends Chess {
       }
     } else {
       for (let i = 1; i < absY; i++) {
-        let blockPoint = new Point(this.point.x, this.point.y + dx * i / absY)
+        let blockPoint = new Point(this.point.x, this.point.y + dy * i / absY)
         if (this.game.findChess(blockPoint)) {
           return false
         }
@@ -233,15 +233,15 @@ class Cannon extends Chess {
       if (absX > 0) {
         for (let i = 1; i < absX; i++) {
           let blockPoint = new Point(this.point.x + dx * i / absX, this.point.y)
-          if (this.game.findChess(blockPoint)) {
-            return true
+          if (!this.game.findChess(blockPoint)) {
+            return false
           }
         }
       } else {
         for (let i = 1; i < absY; i++) {
-          let blockPoint = new Point(this.point.x, this.point.y + dx * i / absY)
-          if (this.game.findChess(blockPoint)) {
-            return true
+          let blockPoint = new Point(this.point.x, this.point.y + dy * i / absY)
+          if (!this.game.findChess(blockPoint)) {
+            return false
           }
         }
       }
@@ -255,7 +255,7 @@ class Cannon extends Chess {
         }
       } else {
         for (let i = 1; i < absY; i++) {
-          let blockPoint = new Point(this.point.x, this.point.y + dx * i / absY)
+          let blockPoint = new Point(this.point.x, this.point.y + dy * i / absY)
           if (this.game.findChess(blockPoint)) {
             return false
           }

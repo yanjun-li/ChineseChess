@@ -1,4 +1,5 @@
 import {Config} from './config'
+// import { isContext } from 'vm';
 export default class ChessBoard {
   constructor (id, {interval = Config.BoardConfig.interval, offset = Config.BoardConfig.offset} = {}) {
     this.id = id
@@ -6,8 +7,20 @@ export default class ChessBoard {
     this.offset = offset
     this.canvas = document.getElementById(this.id)
   }
+  renderCompatibility (ctx){
+    let width = ctx.canvas.width
+    let height = ctx.canvas.height
+    if(window.devicePixelRatio){
+      ctx.canvas.style.width = width + 'px'
+      ctx.canvas.style.height = height + 'px'
+      ctx.canvas.width = width * window.devicePixelRatio
+      ctx.canvas.height = height * window.devicePixelRatio
+      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+    }
+  }
   render () {
     let ctx = this.canvas.getContext('2d')
+    this.renderCompatibility(ctx)
     ctx.translate(this.offset.x, this.offset.y)
     // 内部网格
     for (let j = 0; j < 9; j++) {

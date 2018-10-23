@@ -3,7 +3,8 @@
  [demo](https://yanjun-li.github.io/ChineseChess/src/index.html)  
 
  TODO:
+ - [x] 优化项目结构
  - [ ] 美化样式，添加移动动画
- - [ ] 添加悔棋功能
+ - [x] 添加悔棋功能
  - [ ] 添加DOM版本
- - [ ] 添加线上对战版本 
+ - [ ] 添加线上对战版本

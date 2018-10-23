@@ -8,6 +8,7 @@
   },
   "scripts": {
     "lint": "eslint src/*.js",
+    "jest": "jest",
     "test": "jest --coverage && codecov",
     "dev": "webpack-dev-server --config webpack.dev.js",
     "build": "NODE_ENV=production webpack --config webpack.prod.js"

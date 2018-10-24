@@ -1,8 +1,10 @@
 module.exports = {
   presets:[
-    // "es2015"
+    ['@babel/preset-env']
   ],
   plugins: [
-    // "transform-runtime"
+    [
+      "@babel/transform-runtime",
+    ]
   ]
 }

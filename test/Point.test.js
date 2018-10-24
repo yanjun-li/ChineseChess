@@ -7,7 +7,7 @@ describe('Point类的测试', function () {
     expect(point).toEqual({x:1,y:1})
   })
   test('toSting() is (1,1)',() => {
-    point.toString().toBe('(1,1)')
+    expect(point.toString()).toBe('(1,1)')
   })
   test('move方法测试', function () {
     point.moveTo(2,3)

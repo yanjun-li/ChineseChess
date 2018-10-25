@@ -7,8 +7,10 @@
     "test": "test"
   },
   "scripts": {
+    "babel": "babel src --out-dir lib",
     "lint": "eslint src/*.js",
-    "test": "jest",
+    "jest": "NODE_ENV=test  jest",
+    "test": "jest --coverage && codecov",
     "dev": "webpack-dev-server --config webpack.dev.js",
     "build": "NODE_ENV=production webpack --config webpack.prod.js"
   },
@@ -27,10 +29,18 @@
   },
   "homepage": "https://github.com/yanjun-li/ChineseChess#readme",
   "devDependencies": {
+    "@babel/cli": "~7.1.2",
+    "@babel/core": "~7.1.2",
+    "@babel/plugin-transform-runtime": "~7.1.0",
+    "@babel/preset-env": "~7.1.0",
+    "babel-core": "~7.0.0-bridge.0",
+    "babel-jest": "~23.6.0",
     "clean-webpack-plugin": "~0.1.19",
     "css-loader": "~1.0.0",
     "eslint": "~5.7.0",
     "html-webpack-plugin": "~3.2.0",
+    "jest": "~23.6.0",
+    "regenerator-runtime": "~0.12.1",
     "style-loader": "~0.23.1",
     "webpack": "~4.20.2",
     "webpack-cli": "~3.1.2",
@@ -39,7 +49,7 @@
     "webpack-merge": "~4.1.4"
   },
   "dependencies": {
-    "jest": "~23.6.0",
+    "@babel/runtime": "~7.1.2",
     "lodash": "~4.17.11"
   }
 }
